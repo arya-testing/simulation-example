@@ -21,7 +21,7 @@ public class Arya {
     private static AryaSimulation strictScanSimulations(String name) {
         AryaSimulation simulation = scanSimulations(name);
         if(simulation == null)
-            throw new NullPointerException(String.format("Simulation '%s' not found", name));
+            throw new RuntimeException(String.format("Simulation '%s' not found", name));
         return simulation;
     }
 
