@@ -8,15 +8,17 @@ import org.gradle.jvm.tasks.Jar
 
 class AryaSimulationPlugin implements Plugin<Project> {
 
+    private List<String> excludedArtifacts = ["META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA"]
+
     @Override
     void apply(Project project) {
         project.afterEvaluate {
             for(Task jar : project.getTasksByName("jar", false)) {
                 if(jar instanceof Jar) {
-                    jar.getManifest().getAttributes().put("Main-Class", "com.arya.AryaApplicationLoader")
                     jar.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                    def compile = project.getConfigurations().findByName("compileClasspath")
-                    jar.from(compile.collect { it.isDirectory() ? it : project.zipTree(it) })
+                    def config = project.getConfigurations().findByName("compileClasspath")
+                    jar.from(config.collect { it.isDirectory() ? it : project.zipTree(it) }).exclude(excludedArtifacts)
+                    jar.getManifest().getAttributes().put("Main-Class", "com.arya.AryaApplicationLoader")
                 }
             }
         }
