@@ -121,6 +121,8 @@ public abstract class SeleniumSimulation extends AbstractSimulation {
         Proxy seleniumProxy = ClientUtil.createSeleniumProxy(browserMobProxy);
         return new ChromeDriver(new ChromeOptions()
                 .addArguments("--ignore-certificate-errors")
+                .addArguments("--no-sandbox")
+                .addArguments("--disable-dev-shm-usage")
                 .setProxy(seleniumProxy));
     }
 
