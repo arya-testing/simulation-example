@@ -11,6 +11,7 @@ public class Arya {
     private Arya() { }
 
     public static void runApplication(String[] args) {
+        System.out.println(args);
         String simulationName = Args.getValue(args, "simulation").toUpperCase();
         RuntimeOptions runtimeOptions = getRuntimeOptions(args);
         AryaSimulation simulation = strictScanSimulations(simulationName);
