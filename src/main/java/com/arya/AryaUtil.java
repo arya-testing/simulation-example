@@ -1,9 +1,9 @@
 package com.arya;
 
+import com.arya.logger.Logger;
+import com.arya.logger.LoggerFactory;
 import com.arya.simulation.*;
-import com.arya.util.Args;
-import com.arya.util.Reflection;
-import com.arya.util.Validation;
+import com.arya.util.*;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
@@ -14,6 +14,8 @@ import java.util.Set;
 
 public class AryaUtil {
 
+    private static final Logger logger = LoggerFactory.getLogger(AryaUtil.class);
+    
     private AryaUtil() { }
 
     public static RuntimeOptions getRuntimeOptions(String[] args) {
@@ -47,19 +49,19 @@ public class AryaUtil {
                 if(param == null)
                     continue;
 
-                String paramName = param.value() == null || param.value().isEmpty() ? field.getName() : param.value();
+                String paramName = param.name() == null || param.name().isEmpty() ? field.getName() : param.name();
                 String paramValue;
 
-                if(param.required() && (param.defaultValue() == null || param.defaultValue().isEmpty())) {
+                if(TypeUtil.isAssignableFrom(Boolean.class, field.getType())) {
+                    paramValue = Args.exists(args, paramName) ? "true" : "false";
+                } else if(param.required() && (param.defaultValue() == null || param.defaultValue().isEmpty())) {
                     paramValue = Args.getValue(args, paramName);
                 } else {
-                    paramValue = Args.getValue(args, paramName, param.defaultValue());
-                    if(paramValue.isEmpty())
-                        paramValue = null;
+                    String temp = Args.getValue(args, paramName, param.defaultValue());
+                    paramValue = temp.isEmpty() ? null : temp;
                 }
-                // TODO determine and use type of param
-
-                Reflection.setField(field, simulation, paramValue);
+                if(paramValue != null)
+                    Reflection.setField(field, simulation, StringUtil.parse(paramValue, field.getType()));
             }
             type = type.getSuperclass();
         }
@@ -67,7 +69,7 @@ public class AryaUtil {
 
     public static void executeSimulation(String name, AryaSimulation simulation, RuntimeOptions options) {
         List<Method> methods = Reflection.getSortedDeclaredMethods(simulation.getClass());
-        System.out.println("START SIMULATION: " + name);
+        logger.debug("START SIMULATION: " + name);
 
         try {
             simulation.setUp();
@@ -83,20 +85,20 @@ public class AryaUtil {
                 Simulation sim = simulation.getClass().getAnnotation(Simulation.class);
                 String actionName = getActionName(sim.actionPrefix(), action.value(), method.getName(), pos, methods.size());
 
-                System.out.println("START ACTION: " + actionName);
+                logger.debug("START ACTION: " + actionName);
                 simulation.recordStartAction(actionName);
 
                 // Execute action.
                 Reflection.invokeMethod(method, simulation);
 
                 if(options.getAutoWaitTime() > 0) {
-                    System.out.println("AUTO WAIT: " + options.getAutoWaitTime() + " seconds");
+                    logger.debug("AUTO WAIT: " + options.getAutoWaitTime() + " seconds");
                     simulation.wait(options.getAutoWaitTime());
                 }
 
                 takeScreenshot(simulation, options, actionName, null);
                 simulation.recordEndAction();
-                System.out.println("END ACTION: " + actionName);
+                logger.debug("END ACTION: " + actionName);
 
             }
         } finally {
@@ -105,7 +107,7 @@ public class AryaUtil {
 
         simulation.saveRecordedActions();
         simulation.saveHar();
-        System.out.println("COMPLETE");
+        logger.debug("COMPLETE");
     }
 
     public static String getActionName(String prefix, String name) {
@@ -153,7 +155,7 @@ public class AryaUtil {
     protected static Path takeScreenshot(AryaSimulation simulation, RuntimeOptions options, String actionName, String label) {
         if(options.isAutoScreenshots()) {
             String screenshotName = actionName + (label == null ? "" : "_" + label) + ".png";
-            System.out.println("AUTO " + (label == null ? "" : label.toUpperCase() + " ") + "SCREENSHOT: " + screenshotName);
+            logger.debug("AUTO " + (label == null ? "" : label.toUpperCase() + " ") + "SCREENSHOT: " + screenshotName);
             return simulation.takeScreenshot(screenshotName);
         }
         return null;
