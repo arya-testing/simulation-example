@@ -17,6 +17,7 @@ public abstract class AbstractSimulation implements AryaSimulation {
     @Param(defaultValue = ".")
     protected String simulationPath;
 
+    protected String logPath;
     protected String harPath;
     protected String tmpPath;
     protected String actionsPath;
@@ -28,9 +29,11 @@ public abstract class AbstractSimulation implements AryaSimulation {
     public void setUp() {
         simulationPath   = Paths.get(simulationPath).toAbsolutePath().toString();
         tmpPath          = Paths.get(simulationPath, "tmp").toString();
+        logPath          = Paths.get(tmpPath, "log.txt").toString();
         harPath          = Paths.get(tmpPath, "recording.har").toString();
         actionsPath      = Paths.get(tmpPath, "actions.json").toString();
         screenshotsPath  = Paths.get(tmpPath, "screenshots").toString();
+        // TODO: delete old files
         createDirectories(tmpPath);
         createDirectories(screenshotsPath);
     }
