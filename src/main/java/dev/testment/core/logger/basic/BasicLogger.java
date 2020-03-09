@@ -89,7 +89,7 @@ public class BasicLogger implements Logger {
                     logLevel.name(),
                     AnsiColors.RESET,
                     StringUtil.getLastCharacters(this.name, 60),
-                    String.format(format, args));
+                    String.format(format, (Object[])args));
             this.printStream.print(logMessage);
         }
     }
