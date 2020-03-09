@@ -52,14 +52,15 @@ public class SimulationExecutor {
                 takeScreenshot(simulation, options, actionName, null);
                 simulation.recordEndAction(actionName);
                 logger.debug("END ACTION: " + actionName);
-
             }
+
+            simulation.saveRecordedActions();
+            simulation.saveHar();
+
         } finally {
             simulation.tearDown();
         }
 
-        simulation.saveRecordedActions();
-        simulation.saveHar();
         logger.debug("COMPLETE");
     }
 

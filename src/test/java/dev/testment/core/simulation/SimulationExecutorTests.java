@@ -46,9 +46,9 @@ public class SimulationExecutorTests {
         inOrder.verify(testSimulation).recordEndAction("TS_09_Action9");
         inOrder.verify(testSimulation).recordStartAction("TS_10_Action10");
         inOrder.verify(testSimulation).recordEndAction("TS_10_Action10");
-        inOrder.verify(testSimulation).tearDown();
         inOrder.verify(testSimulation).saveRecordedActions();
         inOrder.verify(testSimulation).saveHar();
+        inOrder.verify(testSimulation).tearDown();
     }
 
     @Test
@@ -74,9 +74,9 @@ public class SimulationExecutorTests {
         inOrder.verify(testSimulation2).wait(10);
         inOrder.verify(testSimulation2).takeScreenshot("03_Action3.png");
         inOrder.verify(testSimulation2).recordEndAction("03_Action3");
-        inOrder.verify(testSimulation2).tearDown();
         inOrder.verify(testSimulation2).saveRecordedActions();
         inOrder.verify(testSimulation2).saveHar();
+        inOrder.verify(testSimulation2).tearDown();
     }
 
     @Test
