@@ -1,9 +1,9 @@
 plugins {
     id 'java'
-    id 'com.arya.application'
+    id 'dev.testment.application'
 }
 
-group 'com.arya'
+group 'dev.testment'
 version '0.0.1'
 
 repositories {
@@ -13,6 +13,7 @@ repositories {
 sourceCompatibility = 1.8
 
 dependencies {
+    implementation group: 'org.mockito', name: 'mockito-core', version: '3.3.0'
     implementation 'org.reflections:reflections:0.9.11'
     implementation 'commons-cli:commons-cli:1.4'
     implementation group: 'org.javassist', name: 'javassist', version: '3.26.0-GA'
@@ -22,6 +23,7 @@ dependencies {
     }    
     implementation group: 'net.lightbody.bmp', name: 'browsermob-core', version: '2.1.5'
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.3.1'
-
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.15.0'
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.4.0")
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 }

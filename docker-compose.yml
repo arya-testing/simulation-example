@@ -4,11 +4,11 @@ services:
     image: jlazarre95/browsermob-proxy
     container_name: browsermob-proxy
     environment:
-      PORT: 8888
+      PORT: 8080
       PROXY_PORT_RANGE: 9000-9010
       TTL: 120
     ports:
-      - "8888:8888"
+      - "8080:8080"
       - "9000-9010:9000-9010"
   hub:
     image: jlazarre95/selenium-hub
