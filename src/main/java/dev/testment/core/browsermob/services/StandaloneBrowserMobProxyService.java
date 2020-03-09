@@ -4,6 +4,7 @@ import dev.testment.core.browsermob.dtos.StartProxyResponse;
 import dev.testment.core.util.OkHttpUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.testment.core.util.exceptions.HttpStatusCodeException;
 import net.lightbody.bmp.proxy.CaptureType;
 import okhttp3.*;
 import org.openqa.selenium.Proxy;
@@ -83,7 +84,7 @@ public class StandaloneBrowserMobProxyService implements BrowserMobProxyService 
                 .post(OkHttpUtil.createEmptyJsonBody())
                 .build();
 
-        try (Response response = OkHttpUtil.executeRequest(this.httpClient, request)) {
+        try (Response response = executeRequest(request)) {
             this.currentPort = OkHttpUtil.parseResponse(this.objectMapper, response, StartProxyResponse.class).getPort();
             return this.currentPort;
         }
@@ -119,7 +120,7 @@ public class StandaloneBrowserMobProxyService implements BrowserMobProxyService 
                 .put(OkHttpUtil.createEmptyJsonBody())
                 .build();
 
-        OkHttpUtil.executeRequest(this.httpClient, request);
+        executeRequest(request);
     }
 
     @Override
@@ -135,13 +136,21 @@ public class StandaloneBrowserMobProxyService implements BrowserMobProxyService 
                 .get()
                 .build();
 
-        try(Response response = OkHttpUtil.executeRequest(this.httpClient, request)) {
+        try(Response response = executeRequest(request)) {
             return OkHttpUtil.parseResponseAsString(response);
         }
     }
 
     public void usePort(int usePort) {
         this.usePort = usePort;
+    }
+
+    private Response executeRequest(Request request) {
+        Response response = OkHttpUtil.executeRequest(this.httpClient, request);
+        if(!response.isSuccessful()) {
+            throw new HttpStatusCodeException("Received a non-successful response from BrowserMob Proxy Server: " + response);
+        }
+        return response;
     }
 
     private boolean capturingAny(CaptureType... captureTypes) {
