@@ -17,10 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -293,7 +290,7 @@ public class SeleniumSimulationTests {
         when(this.standaloneBmpServiceMock.createSeleniumProxy(anyInt())).thenReturn(proxy);
         this.seleniumSimulation.proxy = this.standaloneBmpServiceMock;
 
-        DesiredCapabilities cp = this.seleniumSimulation.getCapabilities(BrowserName.CHROME);
+        Capabilities cp = this.seleniumSimulation.getCapabilities(BrowserName.CHROME);
 
         assertThat(cp.getCapability(CapabilityType.ACCEPT_INSECURE_CERTS)).isEqualTo(true);
         assertThat(cp.getCapability(CapabilityType.PROXY)).isEqualTo(proxy);
@@ -309,7 +306,7 @@ public class SeleniumSimulationTests {
         when(this.standaloneBmpServiceMock.createSeleniumProxy(anyInt())).thenReturn(proxy);
         this.seleniumSimulation.proxy = this.standaloneBmpServiceMock;
 
-        DesiredCapabilities cp = this.seleniumSimulation.getCapabilities(BrowserName.FIREFOX);
+        Capabilities cp = this.seleniumSimulation.getCapabilities(BrowserName.FIREFOX);
 
         assertThat(cp.getCapability(CapabilityType.ACCEPT_INSECURE_CERTS)).isEqualTo(true);
         assertThat(cp.getCapability(CapabilityType.PROXY)).isEqualTo(proxy);
@@ -338,7 +335,7 @@ public class SeleniumSimulationTests {
         desiredCapabilities.setCapability("key", "value");
 
         // Method under test.
-        WebDriver webDriver = this.seleniumSimulation.createLocalWebDriver(BrowserName.CHROME, desiredCapabilities);
+        WebDriver webDriver = this.seleniumSimulation.createLocalWebDriver(BrowserName.CHROME, new ChromeOptions().merge(desiredCapabilities));
 
         assertThat(webDriver).isEqualTo(this.chromeDriverMock);
         assertThat(System.getProperty(SeleniumPropertyKeys.CHROME_DRIVER)).isNull();
@@ -361,7 +358,7 @@ public class SeleniumSimulationTests {
         this.seleniumSimulation.driverPath = "path-to-chrome-driver";
 
         // Method under test.
-        WebDriver webDriver = this.seleniumSimulation.createLocalWebDriver(BrowserName.CHROME, desiredCapabilities);
+        WebDriver webDriver = this.seleniumSimulation.createLocalWebDriver(BrowserName.CHROME, new ChromeOptions().merge(desiredCapabilities));
 
         assertThat(webDriver).isEqualTo(this.chromeDriverMock);
         assertThat(System.getProperty(SeleniumPropertyKeys.CHROME_DRIVER)).isEqualTo("path-to-chrome-driver");
@@ -381,7 +378,7 @@ public class SeleniumSimulationTests {
         desiredCapabilities.setCapability("key", "value");
 
         // Method under test.
-        WebDriver webDriver = this.seleniumSimulation.createLocalWebDriver(BrowserName.FIREFOX, desiredCapabilities);
+        WebDriver webDriver = this.seleniumSimulation.createLocalWebDriver(BrowserName.FIREFOX, new FirefoxOptions().merge(desiredCapabilities));
 
         assertThat(webDriver).isEqualTo(this.firefoxDriverMock);
         assertThat(System.getProperty(SeleniumPropertyKeys.FIREFOX_DRIVER)).isNull();
@@ -403,7 +400,7 @@ public class SeleniumSimulationTests {
         this.seleniumSimulation.driverPath = "path-to-firefox-driver";
 
         // Method under test.
-        WebDriver webDriver = this.seleniumSimulation.createLocalWebDriver(BrowserName.FIREFOX, desiredCapabilities);
+        WebDriver webDriver = this.seleniumSimulation.createLocalWebDriver(BrowserName.FIREFOX, new FirefoxOptions().merge(desiredCapabilities));
 
         assertThat(webDriver).isEqualTo(this.firefoxDriverMock);
         assertThat(System.getProperty(SeleniumPropertyKeys.FIREFOX_DRIVER)).isEqualTo("path-to-firefox-driver");

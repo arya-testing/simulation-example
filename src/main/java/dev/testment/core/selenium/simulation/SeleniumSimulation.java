@@ -11,10 +11,7 @@ import dev.testment.core.simulation.AbstractSimulation;
 import dev.testment.core.simulation.exceptions.UnsupportedBrowserException;
 import dev.testment.core.simulation.param.Param;
 import net.lightbody.bmp.proxy.CaptureType;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -59,6 +56,9 @@ public abstract class SeleniumSimulation extends AbstractSimulation {
 
     @Param(name = "embedded-proxy")
     boolean useEmbeddedProxy;
+
+    @Param(name = "headless")
+    boolean headlessMode;
 
     protected WebDriver driver;
     BrowserMobProxyService proxy;
@@ -145,7 +145,7 @@ public abstract class SeleniumSimulation extends AbstractSimulation {
     }
 
     WebDriver createWebDriver(String browserName) {
-        DesiredCapabilities cp = getCapabilities(browserName);
+        Capabilities cp = getCapabilities(browserName);
         WebDriver d;
 
         this.silentVerboseLogging();
@@ -159,7 +159,7 @@ public abstract class SeleniumSimulation extends AbstractSimulation {
         return d;
     }
 
-    DesiredCapabilities getCapabilities(String browserName) {
+    Capabilities getCapabilities(String browserName) {
         Proxy proxy = this.proxy.createSeleniumProxy(this.proxy.getPort());
 
         DesiredCapabilities cp = new DesiredCapabilities();
@@ -169,38 +169,39 @@ public abstract class SeleniumSimulation extends AbstractSimulation {
         switch(browserName) {
             case BrowserName.CHROME:
                 ChromeOptions chromeOptions = new ChromeOptions();
-//                chromeOptions.addArguments("--disable-gpu");
-//                chromeOptions.addArguments("--no-sandbox");
+                if(this.headlessMode) {
+                    chromeOptions.addArguments("--no-sandbox");
+                    chromeOptions.addArguments("--disable-gpu");
+                    chromeOptions.addArguments("--disable-extensions");
+                    chromeOptions.addArguments("--headless");
+                    chromeOptions.addArguments("--remote-debugging-port=9222");
+                    chromeOptions.addArguments("--start-maximized");
+                }
                 chromeOptions.addArguments("--ignore-certificate-errors");
                 chromeOptions.addArguments("--disable-dev-shm-usage");
-//                chromeOptions.addArguments("--headless");
-                cp.merge(chromeOptions);
-                break;
+                return chromeOptions.merge(cp);
             case BrowserName.FIREFOX:
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
-                cp.merge(firefoxOptions);
-                break;
+                return firefoxOptions.merge(cp);
             default:
                 throw new UnsupportedBrowserException("Unsupported browserName: " + browserName);
         }
-
-        return cp;
     }
 
-    RemoteWebDriver createRemoteWebDriver(DesiredCapabilities cp) {
+    RemoteWebDriver createRemoteWebDriver(Capabilities cp) {
         return new RemoteWebDriver(toURL(this.hubUrl + "/wd/hub") , cp);
     }
 
-    WebDriver createLocalWebDriver(String browserName, DesiredCapabilities cp) {
+    WebDriver createLocalWebDriver(String browserName, Capabilities cp) {
         switch(browserName) {
             case BrowserName.CHROME:
                 if(Validation.isNotEmpty(driverPath))
                     System.setProperty(SeleniumPropertyKeys.CHROME_DRIVER, driverPath);
-                return createChromeDriver(new ChromeOptions().merge(cp));
+                return createChromeDriver((ChromeOptions)cp);
             case BrowserName.FIREFOX:
                 if(Validation.isNotEmpty(driverPath))
                     System.setProperty(SeleniumPropertyKeys.FIREFOX_DRIVER, driverPath);
-                return createFirefoxDriver(new FirefoxOptions().merge(cp));
+                return createFirefoxDriver((FirefoxOptions)cp);
             default:
                 throw new UnsupportedBrowserException("Unsupported browserName: " + browserName);
         }
