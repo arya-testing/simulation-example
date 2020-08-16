@@ -1,2 +1,2 @@
-# Testment Core
+# Testament Java Selenium API
 
